@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { CiSearch } from 'react-icons/ci';
 import { getImages } from 'components/api';
 
-const SearchBar = () => {
+const SearchBar = ({ onSubmitData }) => {
   const validation = Yup.object().shape({
     target: Yup.string().min(2, 'Too short!').required('Required!'),
   });
@@ -16,7 +16,10 @@ const SearchBar = () => {
       }}
       onSubmit={async (values, actions) => {
         try {
-          const data = await getImages(values, 1);
+          const data = await getImages(values.target, 1);
+          const { hits } = data;
+          const { target } = values;
+          onSubmitData(target, hits);
         } catch {
           console.error('ERROR!');
         }
