@@ -11,6 +11,7 @@ const ImageGallery = ({ data }) => {
             key={item.id}
             photo={item.previewURL}
             alt={item.tags}
+            bigImg={item.largeImageURL}
           />
         );
       })}
