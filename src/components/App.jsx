@@ -16,22 +16,16 @@ export class App extends Component {
     isLoading: false,
   };
 
-  onSubmitData = (newTarget, newData, newTotal) => {
+  onSubmitData = async newTarget => {
     this.setState({
       target: newTarget,
-      data: newData,
-      totalPages: newTotal,
-    });
-  };
-  onNewSearch = () => {
-    this.setState({
       page: 1,
     });
   };
-  onLoadMore = async () => {
+  onLoadMore = () => {
     this.setState(prevState => {
       return {
-        page: (prevState.page += 1),
+        page: prevState.page + 1,
       };
     });
   };
@@ -43,11 +37,32 @@ export class App extends Component {
         });
         const res = await getImages(this.state.target, this.state.page);
         const { hits } = res;
-        this.setState({
-          data: hits,
+        this.setState(prevState => {
+          return {
+            data: [...prevState.data, ...hits],
+          };
         });
       } catch {
         toast.error('Error! Try again!');
+      } finally {
+        this.setState({
+          isLoading: false,
+        });
+      }
+    }
+    if (this.state.target !== prevState.target) {
+      try {
+        this.setState({
+          isLoading: true,
+        });
+        const data = await getImages(this.state.target, this.state.page);
+        const { hits, totalHits } = data;
+        this.setState({
+          data: hits,
+          totalPages: Math.ceil(totalHits / 12),
+        });
+      } catch {
+        toast.error('Somethings went wrong! Reload page and try again!');
       } finally {
         this.setState({
           isLoading: false,
@@ -66,12 +81,7 @@ export class App extends Component {
     const { target, data, totalPages, page, isLoading } = this.state;
     return (
       <>
-        <SearchBar
-          onSubmitData={this.onSubmitData}
-          page={page}
-          onNewSearch={this.onNewSearch}
-          toggleLoader={this.toggleLoader}
-        />
+        <SearchBar onSubmitData={this.onSubmitData} />
         {isLoading ? (
           <ColorRing
             visible={true}
@@ -87,7 +97,9 @@ export class App extends Component {
         ) : (
           <ImageGallery target={target} data={data} />
         )}
-        {totalPages > 1 && <Button onLoadMore={this.onLoadMore} />}
+        {totalPages > 1 && page < totalPages && (
+          <Button onLoadMore={this.onLoadMore} />
+        )}
         <Toaster position="top-right" />;
       </>
     );

@@ -19,26 +19,23 @@ export default class ImageGalleryItem extends Component {
     isModalOpen: false,
   };
 
-  openModal = () => {
-    this.setState({
-      isModalOpen: true,
+  toggleModal = () => {
+    this.setState(prevState => {
+      return {
+        isModalOpen: !prevState.isModalOpen,
+      };
     });
   };
 
-  closeModal = () => {
-    this.setState({
-      isModalOpen: false,
-    });
-  };
   render() {
     const { photo, alt, bigImg } = this.props;
     const { isModalOpen } = this.state;
     return (
       <Item>
-        <Image src={photo} alt={alt} onClick={this.openModal} />
+        <Image src={photo} alt={alt} onClick={this.toggleModal} />
         <Modal
           isOpen={isModalOpen}
-          onRequestClose={this.closeModal}
+          onRequestClose={this.toggleModal}
           style={customStyles}
           contentLabel="Gallery item"
         >
