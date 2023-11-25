@@ -20,6 +20,7 @@ export class App extends Component {
     this.setState({
       target: newTarget,
       page: 1,
+      data: [],
     });
   };
   onLoadMore = () => {
@@ -30,39 +31,24 @@ export class App extends Component {
     });
   };
   async componentDidUpdate(prevProps, prevState) {
-    if (this.state.page !== prevState.page) {
+    if (
+      this.state.page !== prevState.page ||
+      this.state.target !== prevState.target
+    ) {
       try {
         this.setState({
           isLoading: true,
         });
         const res = await getImages(this.state.target, this.state.page);
-        const { hits } = res;
+        const { hits, totalHits } = res;
         this.setState(prevState => {
           return {
             data: [...prevState.data, ...hits],
+            totalPages: Math.ceil(totalHits / 12),
           };
         });
       } catch {
         toast.error('Error! Try again!');
-      } finally {
-        this.setState({
-          isLoading: false,
-        });
-      }
-    }
-    if (this.state.target !== prevState.target) {
-      try {
-        this.setState({
-          isLoading: true,
-        });
-        const data = await getImages(this.state.target, this.state.page);
-        const { hits, totalHits } = data;
-        this.setState({
-          data: hits,
-          totalPages: Math.ceil(totalHits / 12),
-        });
-      } catch {
-        toast.error('Somethings went wrong! Reload page and try again!');
       } finally {
         this.setState({
           isLoading: false,
